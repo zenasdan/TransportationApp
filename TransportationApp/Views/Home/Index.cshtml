@@ -101,9 +101,9 @@
             'use strict';
 
             angular.module(appName).controller("transportationController", TransportationController);
-            TransportationController.$inject = ["$scope", requestService];
+            TransportationController.$inject = ["$scope", "requestService"];
 
-            function TransportationController(requestService, $scope) {
+            function TransportationController($scope, requestService) {
                 var vm = this;
                 vm.$onInit = _init;
                 vm.add = _add;
