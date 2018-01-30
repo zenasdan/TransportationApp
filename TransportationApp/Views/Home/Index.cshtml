@@ -1,0 +1,182 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+@section styles {
+    <style>
+        /*Errors Start*/
+        /*Error Message Color*/
+        .has-error {
+            color: #fa755a;
+        }
+
+        /*Invalid Field Border Color*/
+        .invalid {
+            border-color: #fa755a;
+        }
+        /*Errors End*/
+    </style>
+    }
+
+<div ng-controller="transportationController as tc">
+    <div class="col-md-12">
+        <form class="form-horizontal" role="form" name="transportationForm" novalidate>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><strong>Transportation Name</strong></label>
+                <div class="col-sm-10">
+                    <input type="text" ng-class="{'invalid':transportationForm.name.$error.required && transportationForm.name.$touched}" ng-model="tc.transportationModel.name" name="name" class="form-control" placeholder="Enter Transportation Name Here" required>
+                    <div class="has-error" ng-show="transportationForm.name.$error.required && transportationForm.name.$touched">This field is required</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><strong>Transportation Type</strong></label>
+                <div class="col-sm-10">
+                    <input type="text" ng-class="{'invalid':transportationForm.type.$error.required && transportationForm.type.$touched}" ng-model="tc.transportationModel.transportType" name="type" placeholder="Enter Transportation Type Here" class="form-control" required>
+                    <div class="has-error" ng-show="transportationForm.type.$error.required && transportationForm.type.$touched">This field is required</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><strong>Transportation Mode</strong></label>
+                <div class="col-sm-10">
+                    <input type="text" ng-class="{'invalid':transportationForm.mode.$error.required && transportationForm.mode.$touched}" ng-model="tc.transportationModel.transportMode" name="mode" placeholder="Enter Transportation Mode Here" class="form-control" required>
+                    <div class="has-error" ng-show="transportationForm.mode.$error.required && transportationForm.mode.$touched">This field is required</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><strong>Power Source</strong></label>
+                <div class="col-sm-10">
+                    <input type="text" ng-class="{'invalid':transportationForm.powerSource.$error.required && transportationForm.powerSource.$touched}" ng-model="tc.transportationModel.powerSource" name="powerSource" placeholder="Enter Power Source Here" class="form-control" required>
+                    <div class="has-error" ng-show="transportationForm.powerSource.$error.required && transportationForm.powerSource.$touched">This field is required</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><strong>Capacity(ies)</strong></label>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><strong>Count</strong></label>
+                    <div class="col-sm-10">
+                        <input type="number" ng-class="{'invalid':transportationForm.count.$error.required && transportationForm.count.$touched}" ng-model="tc.capacityModel.count" name="count" placeholder="Enter Count Here" class="form-control" required>
+                        <div class="has-error" ng-show="transportationForm.count.$error.required && transportationForm.count.$touched">This field is required</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><strong>Unit of Measure</strong></label>
+                    <div class="col-sm-10">
+                        <input type="text" ng-class="{'invalid':transportationForm.unitOfMeasure.$error.required && transportationForm.unitOfMeasure.$touched}" ng-model="tc.capacityModel.unitOfMeasure" name="unitOfMeasure" placeholder="Enter Unit of Measure Here" class="form-control" required>
+                        <div class="has-error" ng-show="transportationForm.unitOfMeasure.$error.required && transportationForm.unitOfMeasure.$touched">This field is required</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><strong>Type of Cargo</strong></label>
+                    <div class="col-sm-10">
+                        <input type="text" ng-class="{'invalid':transportationForm.typeOfCargo.$error.required && transportationForm.typeOfCargo.$touched}" ng-model="tc.capacityModel.typeOfCargo" name="typeOfCargo" placeholder="Enter Type of Cargo Here" class="form-control" required>
+                        <div class="has-error" ng-show="transportationForm.typeOfCargo.$error.required && transportationForm.typeOfCargo.$touched">This field is required</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <button class="btn btn-success" ng-disabled="transportationForm.$invalid" ng-click="tc.add(transportationForm)">Add</button>
+                    <button class="btn btn-primary" ng-disabled="transportationForm.$invalid" ng-click="tc.update(transportationForm)">Update</button>
+                    <button class="btn btn-danger" ng-disabled="transportationForm.name.$invalid"ng-click="tc.delete(transportationForm)">Delete</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/services/apiRequestService.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            angular.module(appName).controller("transportationController", TransportationController);
+            TransportationController.$inject = ["$scope", requestService];
+
+            function TransportationController(requestService, $scope) {
+                var vm = this;
+                vm.$onInit = _init;
+                vm.add = _add;
+                vm.update = _update;
+                vm.delete = _delete;
+                vm.getAll = _getAll;
+                vm.transportationArray = [];
+                vm.transportationModel = {};
+                vm.transportationModel.capacities = [];
+                vm.capacityModel = {};
+
+                function _init() {
+                    console.log("Transportation is firing");
+                }
+
+                function _add(form) {
+                    vm.transportationModel.capacities.push(vm.capacityModel);
+                    requestService.ApiRequestService("POST", "/api/Transportations", vm.transportationModel)
+                        .then(function (response) {
+                            console.log("add success", response);
+                            _clearAll(form);
+                            _getAll();
+                        })
+                        .catch(function (err) {
+                            console.log("add failed", err);
+                        })
+                }
+
+                function _clearAll(form) {
+                    form.$setUntouched();
+                    form.$setPristine();
+                    vm.transportationModel = {};
+                    vm.transportationModel.capacities = [];
+                    vm.capacityModel = {};
+                }
+
+                function _update(form) {
+                    requestService.ApiRequestService("PUT", "/api/Transportations/" + vm.transportationModel.name, vm.transportationModel)
+                        .then(function (response) {
+                            console.log("update success", response);
+                            _clearAll(form);
+                            _getAll();
+                        })
+                        .catch(function (err) {
+                            console.log("update success", err);
+                        })
+                }
+
+                function _delete(form) {
+                    requestService.ApiRequestService("DELETE", "/api/Transportations/" + vm.transportationModel.name)
+                        .then(function (response) {
+                            console.log("delete success", response);
+                            _clearAll(form);
+                            _getAll();
+                        })
+                        .catch(function (err) {
+                            console.log("delete failed", err);
+                        })
+                }
+
+                function _getAll() {
+                    requestService.ApiRequestService("GET", "/api/Transportations")
+                        .then(function (response) {
+                            console.log("Get all success", response);
+                            vm.transportationArray = response;
+                        })
+                        .catch(function (err) {
+                            console.log("Get all failed", err);
+                        })
+                }
+            }
+        })();
+    </script>
+
+
+    }
